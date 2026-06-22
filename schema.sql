@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict McvyhcX396RoPlhoX1bwrDqHlq9YYmL7LgzYVa7s3ESOIdDjccXiySlBzlszQdL
+\restrict 7b8unqUe46Rx21M1cuatETjA2xQmnTUI1HXsyUTKtzqKsNczoDNceNGNN3PJMwK
 
 -- Dumped from database version 17.9 (Homebrew)
 -- Dumped by pg_dump version 17.9 (Homebrew)
@@ -18,6 +18,20 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
+
 
 SET default_tablespace = '';
 
@@ -102,7 +116,8 @@ CREATE TABLE public.organizations (
     linkedin character varying(255),
     status character varying(20) DEFAULT 'pending'::character varying,
     created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now()
+    updated_at timestamp without time zone DEFAULT now(),
+    location public.geometry(Point,4326)
 );
 
 
@@ -197,6 +212,20 @@ ALTER TABLE ONLY public.sdgs
 
 
 --
+-- Name: idx_organizations_location; Type: INDEX; Schema: public; Owner: ernarmyrzabek
+--
+
+CREATE INDEX idx_organizations_location ON public.organizations USING gist (location);
+
+
+--
+-- Name: idx_organizations_search; Type: INDEX; Schema: public; Owner: ernarmyrzabek
+--
+
+CREATE INDEX idx_organizations_search ON public.organizations USING gin (to_tsvector('english'::regconfig, (((((COALESCE(name, ''::character varying))::text || ' '::text) || COALESCE(description, ''::text)) || ' '::text) || (COALESCE(country, ''::character varying))::text)));
+
+
+--
 -- Name: organization_categories organization_categories_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ernarmyrzabek
 --
 
@@ -232,5 +261,5 @@ ALTER TABLE ONLY public.organization_sdgs
 -- PostgreSQL database dump complete
 --
 
-\unrestrict McvyhcX396RoPlhoX1bwrDqHlq9YYmL7LgzYVa7s3ESOIdDjccXiySlBzlszQdL
+\unrestrict 7b8unqUe46Rx21M1cuatETjA2xQmnTUI1HXsyUTKtzqKsNczoDNceNGNN3PJMwK
 
